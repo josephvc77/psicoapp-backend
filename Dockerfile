@@ -24,8 +24,11 @@ COPY . .
 # Recolectar archivos estáticos
 RUN python manage.py collectstatic --no-input
 
+# Dar permisos al script de inicio
+RUN chmod +x start.sh
+
 # Exponer el puerto
 EXPOSE 8000
 
-# Comando para arrancar con Daphne (soporta WebSockets)
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "psicoapp_backend.asgi:application"]
+# Usar el script de inicio
+CMD ["./start.sh"]

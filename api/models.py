@@ -327,9 +327,17 @@ class Post(models.Model):
         ('gratitud', 'Gratitud'),
     ]
     
+    POST_DOMAINS = [
+        ('psychology', 'Psicología'),
+        ('nutrition', 'Nutrición'),
+        ('exercise', 'Ejercicio'),
+        ('general', 'General'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(help_text="Contenido del post")
     category = models.CharField(max_length=20, choices=POST_CATEGORIES, default='experiencia')
+    domain = models.CharField(max_length=20, choices=POST_DOMAINS, default='general')
     image_url = models.TextField(null=True, blank=True, help_text="URL o data URI de imagen opcional")
     is_anonymous = models.BooleanField(default=False, help_text="Si es True, el post se muestra como anónimo")
     likes_count = models.IntegerField(default=0)

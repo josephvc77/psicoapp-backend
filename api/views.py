@@ -791,6 +791,11 @@ class PostViewSet(viewsets.ModelViewSet):
         if user_id:
             queryset = queryset.filter(user_id=user_id)
         
+        # Filtrar por dominio si se proporciona (Psicología, Nutrición, Ejercicio)
+        domain = self.request.query_params.get('domain', None)
+        if domain:
+            queryset = queryset.filter(domain=domain)
+        
         return queryset.order_by('-created_at')
 
     def create(self, request, *args, **kwargs):

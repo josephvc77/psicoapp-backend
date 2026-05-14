@@ -467,37 +467,23 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
         if obj.xp > 0:
             return obj.xp
         
-        # Backfill XP from ExerciseEntry
+        # Backfill XP from ExerciseEntry (calculated but NOT saved to prevent DB locks in GET)
         entries = ExerciseEntry.objects.filter(user=obj.user)
         total_xp = 0
         for entry in entries:
-            # XP = duration * 8 + exercises_count * 20
             duration_xp = entry.duration * 8
-            
-            # Ensure exercises is a list and count only completed ones
             exercises_list = entry.exercises if isinstance(entry.exercises, list) else []
             completed_exercises = 0
-            
             for ex in exercises_list:
                 if isinstance(ex, dict) and ex.get('completed'):
                     completed_exercises += 1
-            
             exercises_xp = completed_exercises * 20
             total_xp += duration_xp + exercises_xp
-        
-        if total_xp > 0:
-            obj.xp = total_xp
-            # Update level
-            obj.level = math.floor(total_xp / 1000) + 1
-            obj.save(update_fields=['xp', 'level'])
-            
         return total_xp
 
     def get_level(self, obj):
-        # Trigger get_xp to ensure backfill
-        if obj.xp == 0:
-            self.get_xp(obj)
-        return obj.level
+        xp = obj.xp if obj.xp > 0 else self.get_xp(obj)
+        return math.floor(xp / 1000) + 1
 
     def get_nutrition_xp(self, obj):
         if obj.nutrition_xp > 0:
@@ -510,76 +496,14 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
             meals = entry.meals if isinstance(entry.meals, dict) else {}
             completed_count = sum(1 for v in meals.values() if v)
             entry_xp = completed_count * 15
-            if completed_count >= 4: # Assuming 4 meals is daily goal
+            if completed_count >= 4:
                 entry_xp += 100
             total_xp += entry_xp
-            
-        if total_xp > 0:
-            obj.nutrition_xp = total_xp
-            obj.nutrition_level = math.floor(total_xp / 1000) + 1
-            obj.save(update_fields=['nutrition_xp', 'nutrition_level'])
-            
         return total_xp
 
     def get_nutrition_level(self, obj):
-        if obj.nutrition_xp == 0:
-            self.get_nutrition_xp(obj)
-        return obj.nutrition_level
-
-    def get_xp(self, obj):
-        if obj.xp > 0:
-            return obj.xp
-        
-        # Backfill XP from ExerciseEntry
-        entries = ExerciseEntry.objects.filter(user=obj.user)
-        total_xp = 0
-        for entry in entries:
-            # XP = duration * 8 + exercises_count * 20
-            duration_xp = entry.duration * 8
-            exercises_count = len(entry.exercises) if isinstance(entry.exercises, list) else 0
-            exercises_xp = exercises_count * 20
-            total_xp += duration_xp + exercises_xp
-        
-        if total_xp > 0:
-            obj.xp = total_xp
-            # Update level
-            obj.level = math.floor(total_xp / 1000) + 1
-            obj.save(update_fields=['xp', 'level'])
-            
-        return total_xp
-
-    def get_level(self, obj):
-        # Trigger get_xp to ensure backfill
-        if obj.xp == 0:
-            self.get_xp(obj)
-        return obj.level
-
-    def get_nutrition_xp(self, obj):
-        if obj.nutrition_xp > 0:
-            return obj.nutrition_xp
-            
-        # Backfill Nutrition XP
-        entries = NutritionEntry.objects.filter(user=obj.user)
-        total_xp = 0
-        for entry in entries:
-            meals = entry.meals if isinstance(entry.meals, dict) else {}
-            completed_count = sum(1 for v in meals.values() if v)
-            entry_xp = completed_count * 15
-            if completed_count >= 4: # Assuming 4 meals is daily goal
-                entry_xp += 100
-            total_xp += entry_xp
-            
-        if total_xp > 0:
-            obj.nutrition_xp = total_xp
-            obj.nutrition_level = math.floor(total_xp / 1000) + 1
-            obj.save(update_fields=['nutrition_xp', 'nutrition_level'])
-            
-        return total_xp
-
-    def get_nutrition_level(self, obj):
-        if obj.nutrition_xp == 0:
-            self.get_nutrition_xp(obj)
-        return obj.nutrition_level
+        xp = obj.nutrition_xp if obj.nutrition_xp > 0 else self.get_nutrition_xp(obj)
+        return math.floor(xp / 1000) + 1
 
     def get_posts_count(self, obj):
         return obj.user.get_posts_count()

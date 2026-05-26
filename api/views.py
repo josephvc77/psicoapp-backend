@@ -148,6 +148,186 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+def send_ikigai_email(subject, template_type, context, to_email):
+    """Enviar correos electrónicos con formato HTML premium para Ikigai App"""
+    from django.core.mail import EmailMultiAlternatives
+    from django.conf import settings
+    
+    username = context.get('username', 'Usuario')
+    
+    if template_type == 'forgot_password':
+        code = context.get('code')
+        text_content = f"""
+Hola, {username}.
+
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Ikigai App.
+
+Tu código de recuperación es: {code}
+
+Este código es válido por 15 minutos. Si no solicitaste este cambio, puedes ignorar este correo de forma segura.
+
+Saludos cordiales,
+Soporte de Ikigai App
+ikigai.app.support@gmail.com
+"""
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Código de Recuperación - Ikigai App</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F3F4F6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;background-color:#F3F4F6;">
+    <tr>
+      <td align="center" style="padding:40px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="500" style="background-color:#FFFFFF;border-radius:24px;overflow:hidden;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);">
+          <tr>
+            <td align="center" style="background:linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);padding:40px 30px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <div style="width:70px;height:70px;background-color:rgba(255,255,255,0.2);border-radius:20px;display:inline-block;line-height:70px;text-align:center;font-size:32px;color:#FFFFFF;font-weight:bold;box-shadow:0 8px 16px rgba(0,0,0,0.1);">
+                      息
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:16px;">
+                    <h1 style="margin:0;font-size:26px;color:#FFFFFF;font-weight:700;letter-spacing:-0.5px;">Ikigai App</h1>
+                    <p style="margin:4px 0 0 0;font-size:14px;color:rgba(255,255,255,0.8);font-style:italic;">Encuentra tu equilibrio. Vive con propósito.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 32px;background-color:#FFFFFF;">
+              <h2 style="margin:0 0 16px 0;font-size:20px;color:#1F2937;font-weight:700;">¡Hola, {username}!</h2>
+              <p style="margin:0 0 24px 0;font-size:15px;color:#4B5563;line-height:24px;">Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. Entendemos perfectamente lo importante que es tu tranquilidad, por lo que hemos generado el siguiente código temporal de verificación:</p>
+              
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center" style="background-color:#F3F4F6;border-radius:16px;padding:24px 16px;border:1px dashed #D1D5DB;">
+                    <span style="font-size:13px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:8px;">Código de Verificación</span>
+                    <span style="font-size:36px;color:#3B82F6;font-weight:800;letter-spacing:6px;display:block;font-family:'Courier New',Courier,monospace;">{code}</span>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="margin:0 0 24px 0;font-size:14px;color:#6B7280;line-height:22px;background-color:#EFF6FF;border-left:4px solid #3B82F6;padding:12px 16px;border-radius:0 8px 8px 0;">
+                <strong>Importante:</strong> Este código expira en <strong>15 minutos</strong> por motivos de seguridad. Si tú no has realizado esta solicitud, puedes ignorar este correo con total tranquilidad; tu cuenta sigue estando protegida.
+              </p>
+              <hr style="border:0;border-top:1px solid #E5E7EB;margin:32px 0 24px 0;">
+              <p style="margin:0;font-size:13px;color:#9CA3AF;line-height:20px;text-align:center;">Este es un correo automático. Por favor, no respondas a este mensaje.<br>Soporte y Ayuda: <a href="mailto:ikigai.app.support@gmail.com" style="color:#3B82F6;text-decoration:none;font-weight:600;">ikigai.app.support@gmail.com</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+    elif template_type == 'password_changed':
+        datetime_str = context.get('datetime_str')
+        text_content = f"""
+Hola, {username}.
+
+Te informamos que la contraseña de tu cuenta de Ikigai App ha sido cambiada exitosamente.
+
+Detalles del cambio:
+• Estado: Completado con éxito
+• Fecha y hora: {datetime_str} UTC
+
+¿No reconoces esta actividad? Si tú no has realizado este cambio de contraseña, por favor ponte en contacto con nuestro equipo de soporte de forma inmediata a través del correo ikigai.app.support@gmail.com para proteger tu información.
+
+Saludos cordiales,
+Soporte de Ikigai App
+ikigai.app.support@gmail.com
+"""
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seguridad: Contraseña Actualizada - Ikigai App</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F3F4F6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;background-color:#F3F4F6;">
+    <tr>
+      <td align="center" style="padding:40px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="500" style="background-color:#FFFFFF;border-radius:24px;overflow:hidden;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);">
+          <tr>
+            <td align="center" style="background:linear-gradient(135deg, #10B981 0%, #059669 100%);padding:40px 30px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <div style="width:70px;height:70px;background-color:rgba(255,255,255,0.2);border-radius:20px;display:inline-block;line-height:70px;text-align:center;font-size:32px;color:#FFFFFF;font-weight:bold;box-shadow:0 8px 16px rgba(0,0,0,0.1);">
+                      ✓
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:16px;">
+                    <h1 style="margin:0;font-size:26px;color:#FFFFFF;font-weight:700;letter-spacing:-0.5px;">Ikigai App</h1>
+                    <p style="margin:4px 0 0 0;font-size:14px;color:rgba(255,255,255,0.8);font-style:italic;">Tu cuenta está segura y al día.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 32px;background-color:#FFFFFF;">
+              <h2 style="margin:0 0 16px 0;font-size:20px;color:#1F2937;font-weight:700;">¡Hola, {username}!</h2>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#4B5563;line-height:24px;">Te informamos que <strong>la contraseña de tu cuenta de Ikigai App ha sido cambiada exitosamente</strong>.</p>
+              
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+                <tr>
+                  <td style="background-color:#ECFDF5;border-radius:16px;padding:20px;border:1px solid #A7F3D0;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="font-size:14px;color:#065F46;line-height:22px;">
+                          <strong>Detalles del cambio:</strong><br>
+                          • Estado: Completado con éxito<br>
+                          • Fecha y hora: {datetime_str} UTC
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="margin:0 0 24px 0;font-size:14px;color:#EF4444;line-height:22px;background-color:#FEF2F2;border-left:4px solid #EF4444;padding:12px 16px;border-radius:0 8px 8px 0;">
+                <strong>¿No reconoces esta actividad?</strong> Si tú no has realizado este cambio de contraseña, por favor ponte en contacto con nuestro equipo de soporte de forma inmediata a través del correo <a href="mailto:ikigai.app.support@gmail.com" style="color:#EF4444;text-decoration:underline;font-weight:600;">ikigai.app.support@gmail.com</a> para proteger tu información.
+              </p>
+              <hr style="border:0;border-top:1px solid #E5E7EB;margin:32px 0 24px 0;">
+              <p style="margin:0;font-size:13px;color:#9CA3AF;line-height:20px;text-align:center;">Este es un correo automático de seguridad.<br>Soporte y Ayuda: <a href="mailto:ikigai.app.support@gmail.com" style="color:#059669;text-decoration:none;font-weight:600;">ikigai.app.support@gmail.com</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+    else:
+        return False
+        
+    msg = EmailMultiAlternatives(
+        subject,
+        text_content,
+        settings.DEFAULT_FROM_EMAIL,
+        [to_email]
+    )
+    msg.attach_alternative(html_content, "text/html")
+    msg.send(fail_silently=False)
+    return True
+
+
 class AuthViewSet(viewsets.ViewSet):
     """ViewSet para autenticación"""
     permission_classes = [AllowAny]
@@ -243,32 +423,15 @@ class AuthViewSet(viewsets.ViewSet):
         # Guardar en base de datos
         PasswordResetCode.objects.create(user=user, code=code)
         
-        # Enviar correo electrónico
-        from django.core.mail import send_mail
-        from django.conf import settings
-        
-        subject = 'Código de Recuperación de Contraseña - Ikigai App'
-        message = f"""
-Hola, {user.username or 'Usuario'}.
-
-Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Ikigai App.
-
-Tu código de recuperación es: {code}
-
-Este código es válido por 15 minutos. Si no solicitaste este cambio, puedes ignorar este correo de forma segura.
-
-Saludos cordiales,
-Soporte de Ikigai App
-ikigai.app.support@gmail.com
-"""
-        
         try:
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
+            send_ikigai_email(
+                'Código de Recuperación de Contraseña - Ikigai App',
+                'forgot_password',
+                {
+                    'username': user.username or 'Usuario',
+                    'code': code
+                },
+                user.email
             )
             return Response({
                 'success': True,
@@ -331,6 +494,21 @@ ikigai.app.support@gmail.com
         reset_code.is_used = True
         reset_code.save()
         
+        # Enviar email de notificación de contraseña actualizada
+        try:
+            from django.utils import timezone
+            send_ikigai_email(
+                'Seguridad: Contraseña Actualizada - Ikigai App',
+                'password_changed',
+                {
+                    'username': user.username or 'Usuario',
+                    'datetime_str': timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                },
+                user.email
+            )
+        except Exception as e:
+            print(f"[Email Error] No se pudo enviar el correo de confirmación: {e}")
+        
         return Response({
             'success': True,
             'message': 'Tu contraseña ha sido restablecida con éxito.'
@@ -338,7 +516,6 @@ ikigai.app.support@gmail.com
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path='change-password')
     def change_password(self, request):
-
         """Cambiar contraseña de usuario autenticado"""
         old_password = request.data.get('old_password', '').strip()
         new_password = request.data.get('new_password', '').strip()
@@ -359,10 +536,26 @@ ikigai.app.support@gmail.com
         user.set_password(new_password)
         user.save()
         
+        # Enviar email de confirmación
+        try:
+            from django.utils import timezone
+            send_ikigai_email(
+                'Seguridad: Contraseña Actualizada - Ikigai App',
+                'password_changed',
+                {
+                    'username': user.username or 'Usuario',
+                    'datetime_str': timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                },
+                user.email
+            )
+        except Exception as e:
+            print(f"[Email Error] No se pudo enviar el correo de confirmación: {e}")
+        
         return Response({
             'success': True,
             'message': 'Contraseña actualizada con éxito.'
         })
+
 
 
 

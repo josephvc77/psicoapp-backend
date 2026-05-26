@@ -464,45 +464,20 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
         }
 
     def get_xp(self, obj):
-        if obj.xp > 0:
-            return obj.xp
-        
-        # Backfill XP from ExerciseEntry (calculated but NOT saved to prevent DB locks in GET)
-        entries = ExerciseEntry.objects.filter(user=obj.user)
-        total_xp = 0
-        for entry in entries:
-            duration_xp = entry.duration * 8
-            exercises_list = entry.exercises if isinstance(entry.exercises, list) else []
-            completed_exercises = 0
-            for ex in exercises_list:
-                if isinstance(ex, dict) and ex.get('completed'):
-                    completed_exercises += 1
-            exercises_xp = completed_exercises * 20
-            total_xp += duration_xp + exercises_xp
-        return total_xp
+        # El frontend es la fuente de verdad para el XP.
+        # Retornamos el valor guardado en BD sin recalcular.
+        return obj.xp or 0
 
     def get_level(self, obj):
-        xp = obj.xp if obj.xp > 0 else self.get_xp(obj)
+        xp = obj.xp or 0
         return math.floor(xp / 1000) + 1
 
     def get_nutrition_xp(self, obj):
-        if obj.nutrition_xp > 0:
-            return obj.nutrition_xp
-            
-        # Backfill Nutrition XP
-        entries = NutritionEntry.objects.filter(user=obj.user)
-        total_xp = 0
-        for entry in entries:
-            meals = entry.meals if isinstance(entry.meals, dict) else {}
-            completed_count = sum(1 for v in meals.values() if v)
-            entry_xp = completed_count * 15
-            if completed_count >= 4:
-                entry_xp += 100
-            total_xp += entry_xp
-        return total_xp
+        # El frontend es la fuente de verdad para el XP de nutrición.
+        return obj.nutrition_xp or 0
 
     def get_nutrition_level(self, obj):
-        xp = obj.nutrition_xp if obj.nutrition_xp > 0 else self.get_nutrition_xp(obj)
+        xp = obj.nutrition_xp or 0
         return math.floor(xp / 1000) + 1
 
     def get_posts_count(self, obj):

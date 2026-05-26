@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -150,7 +151,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class AuthViewSet(viewsets.ViewSet):
     """ViewSet para autenticación"""
     permission_classes = [AllowAny]
-    authentication_classes = [] # Disable authentication to bypass CSRF check on login/register
+    authentication_classes = [TokenAuthentication] # Use TokenAuthentication to enable request.user while bypassing CSRF checks on login/register
+
 
     @action(detail=False, methods=['post'])
     def register(self, request):

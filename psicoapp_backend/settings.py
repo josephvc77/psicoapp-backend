@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'api',
+    'anymail',
 ]
 
 AUTH_USER_MODEL = 'api.User'
@@ -326,12 +327,14 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
-# Configuración de Correo Electrónico (Gmail SMTP)
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='ikigai.app.support@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='') # Se debe configurar en las variables de entorno (.env)
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# Configuración de Correo Electrónico (Resend Email API con Anymail)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='anymail.backends.resend.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend')
+
+ANYMAIL = {
+    "RESEND_API_KEY": config("RESEND_API_KEY", default=""),
+}
+
+# En el sandbox gratuito de Resend, el remitente debe ser onboarding@resend.dev si no hay dominio verificado.
+# Dejamos que se configure a través de variables de entorno para máxima flexibilidad.
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="onboarding@resend.dev")
 

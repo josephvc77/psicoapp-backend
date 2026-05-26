@@ -649,3 +649,21 @@ class GratitudeEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.date}"
+
+
+class PasswordResetCode(models.Model):
+    """Códigos de verificación temporales de 6 dígitos para restablecer contraseñas"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reset_codes')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_expired(self):
+        # Válido por 15 minutos
+        from django.utils import timezone
+        from datetime import timedelta
+        return timezone.now() > self.created_at + timedelta(minutes=15)
+
+    def __str__(self):
+        return f"Code for {self.user.email}: {self.code}"
+

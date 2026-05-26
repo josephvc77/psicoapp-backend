@@ -17,7 +17,7 @@ from .models import (
     AISession, HydrationEntry, ChatMessage as AIChatMessage,
     Post, Comment, PostLike, CommentLike,
     Achievement, UserAchievement, Notification,
-    SavedPost, PostReport, UserFollow, Conversation, DirectMessage, GratitudeEntry
+    SavedPost, PostReport, UserFollow, Conversation, DirectMessage, GratitudeEntry, PasswordResetCode
 )
 from .serializers import (
     UserSerializer, UserProfileSerializer, UserProfileDetailSerializer, RegisterSerializer,
@@ -215,6 +215,153 @@ class AuthViewSet(viewsets.ViewSet):
         
         exists = User.objects.filter(username__iexact=username).exists()
         return Response({'exists': exists})
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny], url_path='forgot-password')
+    def forgot_password(self, request):
+        """Generar código de verificación de 6 dígitos y enviarlo por correo"""
+        email = request.data.get('email', '').lower().strip()
+        if not email:
+            return Response({
+                'success': False,
+                'error': 'El campo "email" es requerido.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'No existe un usuario registrado con este correo electrónico.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Generar código aleatorio de 6 dígitos
+        import random
+        code = f"{random.randint(100000, 999999)}"
+        
+        # Guardar en base de datos
+        PasswordResetCode.objects.create(user=user, code=code)
+        
+        # Enviar correo electrónico
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        subject = 'Código de Recuperación de Contraseña - Ikigai App'
+        message = f"""
+Hola, {user.username or 'Usuario'}.
+
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Ikigai App.
+
+Tu código de recuperación es: {code}
+
+Este código es válido por 15 minutos. Si no solicitaste este cambio, puedes ignorar este correo de forma segura.
+
+Saludos cordiales,
+Soporte de Ikigai App
+ikigai.app.support@gmail.com
+"""
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            return Response({
+                'success': True,
+                'message': 'Se ha enviado un código de recuperación a tu correo electrónico.'
+            })
+        except Exception as e:
+            # Fallback en desarrollo para mostrar el código si no hay internet / SMTP no configurado
+            print(f"[Email Error] No se pudo enviar el correo: {e}")
+            return Response({
+                'success': True,
+                'message': 'Se generó el código con éxito (modo desarrollo/consola). Por favor revisa la consola del servidor.',
+                'dev_code': code  # Proporcionar el código en la respuesta si falla el email, excelente para testing local sin credenciales
+            })
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny], url_path='reset-password')
+    def reset_password(self, request):
+        """Restablecer contraseña usando el código recibido"""
+        email = request.data.get('email', '').lower().strip()
+        code = request.data.get('code', '').strip()
+        new_password = request.data.get('password', '').strip()
+        
+        if not email or not code or not new_password:
+            return Response({
+                'success': False,
+                'error': 'Los campos "email", "code" y "password" son obligatorios.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Usuario no encontrado.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Buscar el último código activo para el usuario
+        reset_code = PasswordResetCode.objects.filter(
+            user=user,
+            code=code,
+            is_used=False
+        ).order_by('-created_at').first()
+        
+        if not reset_code:
+            return Response({
+                'success': False,
+                'error': 'El código ingresado es incorrecto o ya ha sido utilizado.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if reset_code.is_expired():
+            return Response({
+                'success': False,
+                'error': 'El código ha expirado. Por favor, solicita uno nuevo.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Actualizar contraseña
+        user.set_password(new_password)
+        user.save()
+        
+        # Marcar código como usado
+        reset_code.is_used = True
+        reset_code.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Tu contraseña ha sido restablecida con éxito.'
+        })
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path='change-password')
+    def change_password(self, request):
+
+        """Cambiar contraseña de usuario autenticado"""
+        old_password = request.data.get('old_password', '').strip()
+        new_password = request.data.get('new_password', '').strip()
+        
+        if not old_password or not new_password:
+            return Response({
+                'success': False,
+                'error': 'Los campos "old_password" y "new_password" son obligatorios.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = request.user
+        if not user.check_password(old_password):
+            return Response({
+                'success': False,
+                'error': 'La contraseña actual es incorrecta.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Contraseña actualizada con éxito.'
+        })
+
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):

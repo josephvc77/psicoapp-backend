@@ -201,16 +201,16 @@ CORS_ALLOW_HEADERS = [
 # ============ JAZZMIN CONFIGURATION ============
 JAZZMIN_SETTINGS = {
     # Título del sitio
-    "site_title": "PsicoApp Admin",
-    "site_header": "PsicoApp",
-    "site_brand": "PsicoApp",
+    "site_title": "Ikigai App Admin",
+    "site_header": "Ikigai",
+    "site_brand": "Ikigai App",
     "site_logo": None,
     "login_logo": None,
     "login_logo_dark": None,
     "site_logo_classes": "img-circle",
     "site_icon": None,
-    "welcome_sign": "Bienvenido al Panel de Administración de PsicoApp",
-    "copyright": "PsicoApp",
+    "welcome_sign": "Bienvenido al Panel de Administración de Ikigai App",
+    "copyright": "Ikigai App",
     "search_model": ["api.User", "api.UserProfile"],
     
     # Tema
@@ -325,3 +325,13 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
+
+# Configuración de Correo Electrónico (Gmail SMTP)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='ikigai.app.support@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='') # Se debe configurar en las variables de entorno (.env)
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

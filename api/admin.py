@@ -9,8 +9,9 @@ from .models import (
     AISession, HydrationEntry, Post, Comment,
     PostLike, CommentLike, Achievement, UserAchievement,
     Notification, SavedPost, PostReport, UserFollow,
-    Conversation, DirectMessage
+    Conversation, DirectMessage, PasswordResetCode
 )
+
 
 
 # ============ INLINES (Datos relacionados) ============
@@ -953,4 +954,13 @@ class DirectMessageAdmin(admin.ModelAdmin):
         preview = obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
         return preview
     get_content_preview.short_description = 'Contenido'
+
+
+@admin.register(PasswordResetCode)
+class PasswordResetCodeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'code', 'is_used', 'created_at']
+    list_filter = ['is_used', 'created_at']
+    search_fields = ['user__email', 'code']
+    readonly_fields = ['created_at']
+
 

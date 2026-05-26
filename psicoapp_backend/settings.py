@@ -327,14 +327,14 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
-# Configuración de Correo Electrónico (Resend Email API con Anymail)
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='anymail.backends.resend.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend')
+# Configuración de Correo Electrónico (Brevo Email API con Anymail)
+# Brevo permite verificar solo el email del remitente sin necesitar un dominio propio.
+# Funciona via HTTP (puerto 443), no bloqueado en Render Free tier.
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='anymail.backends.brevo.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend')
 
 ANYMAIL = {
-    "RESEND_API_KEY": config("RESEND_API_KEY", default=""),
+    "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
 }
 
-# En el sandbox gratuito de Resend, el remitente debe ser onboarding@resend.dev si no hay dominio verificado.
-# Dejamos que se configure a través de variables de entorno para máxima flexibilidad.
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="onboarding@resend.dev")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="ikigai.app.support@gmail.com")
 

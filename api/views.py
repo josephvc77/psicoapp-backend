@@ -314,8 +314,110 @@ ikigai.app.support@gmail.com
 </body>
 </html>
 """
+    elif template_type == 'welcome':
+        text_content = f"""
+¡Te damos la bienvenida a Ikigai App, {username}! 🌟
+
+Gracias por unirte a nosotros en este viaje hacia tu bienestar integral.
+
+Ikigai es mucho más que una aplicación; es tu compañero personal en la búsqueda de equilibrio físico, mental y emocional. Nuestro propósito es ayudarte a alcanzar tu mejor versión mediante herramientas personalizadas de salud.
+
+Esto es lo que tienes preparado hoy en Ikigai:
+• 🧠 Mente Sana: Apoyo psicológico interactivo, técnicas de respiración y meditaciones de atención plena.
+• 🥗 Nutrición Inteligente: Registra tu agua y solicita planes alimenticios personalizados diseñados por IA.
+• 🏋️ Ejercicio Dinámico: Rutinas deportivas adaptadas a tu nivel y registro de progreso diario.
+
+Estamos entusiasmados de verte crecer y progresar paso a paso.
+
+Con aprecio,
+El Equipo de Ikigai App
+Buzón Oficial: ikigai.app.support@gmail.com
+"""
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¡Te damos la bienvenida a Ikigai App! 🌟</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F3F4F6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;background-color:#F3F4F6;">
+    <tr>
+      <td align="center" style="padding:40px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="500" style="background-color:#FFFFFF;border-radius:24px;overflow:hidden;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);">
+          <tr>
+            <td align="center" style="background:linear-gradient(135deg, #FF8A00 0%, #FF007A 100%);padding:45px 30px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <div style="width:70px;height:70px;background-color:rgba(255,255,255,0.20);border-radius:22px;display:inline-block;line-height:70px;text-align:center;font-size:32px;color:#FFFFFF;font-weight:bold;box-shadow:0 8px 16px rgba(0,0,0,0.15);">
+                      生
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:16px;">
+                    <h1 style="margin:0;font-size:28px;color:#FFFFFF;font-weight:800;letter-spacing:-0.5px;">¡Bienvenido/a a Ikigai!</h1>
+                    <p style="margin:4px 0 0 0;font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;">Tu viaje hacia el propósito y el equilibrio comienza hoy.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 32px;background-color:#FFFFFF;">
+              <h2 style="margin:0 0 16px 0;font-size:20px;color:#1F2937;font-weight:700;">¡Hola, {username}!</h2>
+              <p style="margin:0 0 20px 0;font-size:15px;color:#4B5563;line-height:24px;">Nos llena de felicidad y gratitud darte la bienvenida a **Ikigai App**. Has dado el primer paso de un camino transformador hacia tu bienestar físico, mental y emocional.</p>
+              <p style="margin:0 0 28px 0;font-size:15px;color:#4B5563;line-height:24px;">Ikigai es una palabra japonesa que significa **\"la razón de ser\"** o **\"tu propósito de vida\"**. Esta aplicación nació con el deseo genuino de ser tu guía y soporte en este proceso.</p>
+              
+              <h3 style="margin:0 0 12px 0;font-size:15px;color:#1F2937;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">¿Qué te espera en Ikigai?</h3>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:32px;">
+                <tr>
+                  <td style="padding-bottom:12px;">
+                    <div style="background-color:#F9FAFB;border-radius:12px;padding:12px 16px;border:1px solid #E5E7EB;">
+                      <span style="font-size:16px;margin-right:8px;">🧠</span>
+                      <strong style="color:#1F2937;font-size:14px;">Mente & Apoyo Psicológico</strong>
+                      <p style="margin:4px 0 0 0;font-size:13px;color:#6B7280;line-height:18px;">Interactúa con nuestro psicólogo IA, practica respiraciones profundas y diario de gratitud.</p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom:12px;">
+                    <div style="background-color:#F9FAFB;border-radius:12px;padding:12px 16px;border:1px solid #E5E7EB;">
+                      <span style="font-size:16px;margin-right:8px;">🥗</span>
+                      <strong style="color:#1F2937;font-size:14px;">Nutrición & Hidratación</strong>
+                      <p style="margin:4px 0 0 0;font-size:13px;color:#6B7280;line-height:18px;">Solicita planes alimenticios personalizados y registra tu agua diariamente de forma visual.</p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="background-color:#F9FAFB;border-radius:12px;padding:12px 16px;border:1px solid #E5E7EB;">
+                      <span style="font-size:16px;margin-right:8px;">🏋️</span>
+                      <strong style="color:#1F2937;font-size:14px;">Ejercicio & Hábitos</strong>
+                      <p style="margin:4px 0 0 0;font-size:13px;color:#6B7280;line-height:18px;">Accede a rutinas completas diseñadas a tu medida y registra tus progresos en tu calendario.</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 28px 0;font-size:15px;color:#4B5563;line-height:24px;text-align:center;font-weight:600;">¡Tu salud y tu bienestar son nuestra mayor prioridad! 🧡</p>
+              
+              <hr style="border:0;border-top:1px solid #E5E7EB;margin:32px 0 24px 0;">
+              <p style="margin:0;font-size:13px;color:#9CA3AF;line-height:20px;text-align:center;">Te deseamos un maravilloso camino hacia tu bienestar.<br>El Equipo de Ikigai App<br><a href="mailto:ikigai.app.support@gmail.com" style="color:#FF007A;text-decoration:none;font-weight:600;">ikigai.app.support@gmail.com</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
     else:
         return False
+
         
     msg = EmailMultiAlternatives(
         subject,
@@ -341,6 +443,20 @@ class AuthViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
+            
+            # Enviar correo de bienvenida premium
+            try:
+                send_ikigai_email(
+                    '¡Te damos la bienvenida a Ikigai App! 🌟',
+                    'welcome',
+                    {
+                        'username': user.username or 'Usuario'
+                    },
+                    user.email
+                )
+            except Exception as e:
+                print(f"[Email Error] No se pudo enviar el correo de bienvenida: {e}")
+                
             return Response({
                 'success': True,
                 'user': UserSerializer(user).data,
